@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>
+        Feedback | EventHub
+    </title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+
+<body>
+
+<nav class="navbar">
+
+    <a href="/" class="logo">
+        Event<span>Hub</span>
+    </a>
+
+    <div class="nav-links">
+
+        <a href="/">
+            Home
+        </a>
+
+        <a href="/events">
+            Events
+        </a>
+
+    </div>
+
+</nav>
+
+
+<section class="feedback-section">
+
+    <div class="feedback-card">
+
+        {% if submitted %}
+
+        <div style="text-align:center;">
+
+            <div class="success-icon">
+                ✓
+            </div>
+
+            <p class="small-title">
+                FEEDBACK RECEIVED
+            </p>
+
+            <h1>
+                Thank You!
+            </h1>
+
+            <p>
+                Your feedback for
+                <strong>
+                    {{ event["name"] }}
+                </strong>
+                has been submitted successfully.
+            </p>
+
+            <br>
+
+            <a
+                href="/events"
+                class="primary-btn">
+
+                Browse Events →
+
+            </a>
+
+        </div>
+
+        {% else %}
+
+        <p class="small-title">
+            EVENT FEEDBACK
+        </p>
+
+        <h1>
+            Share Your Experience
+        </h1>
+
+        <p>
+            Help us improve future events by sharing
+            your experience.
+        </p>
+
+
+        <div
+            class="available-note">
+
+            📅 {{ event["name"] }}
+
+        </div>
+
+
+        <form method="POST">
+
+            <div class="form-group">
+
+                <label>
+                    Your Name
+                </label>
+
+                <input
+                    type="text"
+                    name="name"
+                    placeholder="Enter your name"
+                    required>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Email
+                </label>
+
+                <input
+                    type="email"
+                    name="email"
+                    placeholder="Enter your email"
+                    required>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Rating
+                </label>
+
+                <select name="rating">
+
+                    <option value="5">
+                        5 - Excellent ⭐⭐⭐⭐⭐
+                    </option>
+
+                    <option value="4">
+                        4 - Very Good ⭐⭐⭐⭐
+                    </option>
+
+                    <option value="3">
+                        3 - Good ⭐⭐⭐
+                    </option>
+
+                    <option value="2">
+                        2 - Average ⭐⭐
+                    </option>
+
+                    <option value="1">
+                        1 - Poor ⭐
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Comments
+                </label>
+
+                <textarea
+                    name="comments"
+                    placeholder="Tell us about your experience...">
+                </textarea>
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="primary-btn"
+                style="width:100%;">
+
+                Submit Feedback
+
+            </button>
+
+        </form>
+
+        {% endif %}
+
+    </div>
+
+</section>
+
+
+<footer>
+
+    <div class="logo">
+        Event<span>Hub</span>
+    </div>
+
+    <p>
+        © 2026 EventHub. Event Management System.
+    </p>
+
+</footer>
+
+
+</body>
+
+</html>

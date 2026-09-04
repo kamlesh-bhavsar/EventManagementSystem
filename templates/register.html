@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>
+        Register | EventHub
+    </title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+
+<body>
+
+<nav class="navbar">
+
+    <a href="/" class="logo">
+        Event<span>Hub</span>
+    </a>
+
+    <div class="nav-links">
+
+        <a href="/">
+            Home
+        </a>
+
+        <a href="/events">
+            Events
+        </a>
+
+    </div>
+
+</nav>
+
+
+<section class="registration-section">
+
+    <div class="registration-card">
+
+        <p class="small-title">
+            EVENT REGISTRATION
+        </p>
+
+        <h1>
+            Register for {{ event["name"] }}
+        </h1>
+
+        <p>
+            Fill in your details below to reserve your seats.
+        </p>
+
+
+        <div class="available-note">
+
+            🎟️ {{ available_seats }} seats currently available
+
+        </div>
+
+
+        <form
+            method="POST"
+            data-disable-submit>
+
+            <div class="form-group">
+
+                <label>
+                    Full Name
+                </label>
+
+                <input
+                    type="text"
+                    name="name"
+                    placeholder="Enter your full name"
+                    required>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Email Address
+                </label>
+
+                <input
+                    type="email"
+                    name="email"
+                    placeholder="Enter your email"
+                    required>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Phone Number
+                </label>
+
+                <input
+                    type="tel"
+                    name="phone"
+                    placeholder="Enter your phone number"
+                    required>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Number of Seats
+                </label>
+
+                <input
+                    type="number"
+                    name="seats"
+                    min="1"
+                    max="{{ available_seats }}"
+                    value="1"
+                    required>
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="primary-btn"
+                style="width:100%;">
+
+                Confirm Registration →
+
+            </button>
+
+        </form>
+
+
+        <div
+            style="
+                text-align:center;
+                margin-top:20px;
+            ">
+
+            <a
+                href="/event/{{ event['id'] }}"
+                style="
+                    color:#6255ff;
+                    font-size:14px;
+                    font-weight:bold;
+                ">
+
+                ← Back to Event
+
+            </a>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<footer>
+
+    <div class="logo">
+        Event<span>Hub</span>
+    </div>
+
+    <p>
+        © 2026 EventHub. Event Management System.
+    </p>
+
+</footer>
+
+
+</body>
+
+</html>

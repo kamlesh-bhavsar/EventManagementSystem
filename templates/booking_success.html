@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>
+        Registration Successful | EventHub
+    </title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+
+<body>
+
+<nav class="navbar">
+
+    <a href="/" class="logo">
+        Event<span>Hub</span>
+    </a>
+
+    <div class="nav-links">
+
+        <a href="/">
+            Home
+        </a>
+
+        <a href="/events">
+            Events
+        </a>
+
+    </div>
+
+</nav>
+
+
+<section class="success-section">
+
+    <div class="success-card">
+
+        <div class="success-icon">
+            ✓
+        </div>
+
+        <p class="small-title">
+            REGISTRATION CONFIRMED
+        </p>
+
+        <h1>
+            You're registered!
+        </h1>
+
+        <p>
+            Thank you,
+            <strong>{{ name }}</strong>.
+        </p>
+
+        <p>
+            Your registration for
+            <strong>{{ event["name"] }}</strong>
+            has been successfully recorded.
+        </p>
+
+
+        <div class="success-event">
+
+            <p>
+                📅
+                <strong>Date:</strong>
+                {{ event["date"] }}
+            </p>
+
+            <p>
+                📍
+                <strong>Location:</strong>
+                {{ event["location"] }}
+            </p>
+
+            <p>
+                👥
+                <strong>Seats booked:</strong>
+                {{ seats }}
+            </p>
+
+            <p>
+                📧
+                <strong>Registered email:</strong>
+                {{ email }}
+            </p>
+
+        </div>
+
+
+        <p
+            style="
+                font-size:13px;
+                color:#777;
+                margin-bottom:22px;
+            ">
+
+            Your booking has been saved successfully.
+
+        </p>
+
+
+        <div
+            style="
+                display:flex;
+                justify-content:center;
+                gap:10px;
+                flex-wrap:wrap;
+            ">
+
+            <a
+                href="/events"
+                class="primary-btn">
+
+                Browse More Events →
+
+            </a>
+
+            <a
+                href="/feedback/{{ event['id'] }}"
+                class="secondary-btn">
+
+                ⭐ Give Feedback
+
+            </a>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<footer>
+
+    <div class="logo">
+        Event<span>Hub</span>
+    </div>
+
+    <p>
+        © 2026 EventHub. Event Management System.
+    </p>
+
+</footer>
+
+
+</body>
+
+</html>

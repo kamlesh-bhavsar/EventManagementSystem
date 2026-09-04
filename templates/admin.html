@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>
+        Admin Dashboard | EventHub
+    </title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+    <script
+        src="{{ url_for('static', filename='js/script.js') }}"
+        defer>
+    </script>
+
+</head>
+
+<body>
+
+<nav class="navbar">
+
+    <a href="/" class="logo">
+        Event<span>Hub</span>
+    </a>
+
+    <div class="nav-links">
+
+        <a href="/">
+            Website
+        </a>
+
+        <a href="/events">
+            Events
+        </a>
+
+        <a href="/admin/reports">
+            Reports
+        </a>
+
+        <a
+            href="/logout"
+            class="nav-admin">
+
+            Logout
+
+        </a>
+
+    </div>
+
+</nav>
+
+
+<main class="admin-page">
+
+    <!-- =================================================
+         HEADER
+         ================================================= -->
+
+    <div class="admin-header">
+
+        <div>
+
+            <p class="small-title">
+                EVENTHUB ADMIN
+            </p>
+
+            <h1>
+                Dashboard
+            </h1>
+
+            <p>
+                Manage events, bookings, attendance and feedback.
+            </p>
+
+        </div>
+
+        <div class="admin-actions">
+
+            <a
+                href="/admin/reports"
+                class="secondary-btn">
+
+                📊 Reports
+
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         STATISTICS
+         ================================================= -->
+
+    <div class="stats-grid">
+
+        <div class="stat-card">
+
+            <div class="stat-label">
+                TOTAL EVENTS
+            </div>
+
+            <div class="stat-value">
+                {{ total_events }}
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-label">
+                TOTAL BOOKINGS
+            </div>
+
+            <div class="stat-value">
+                {{ total_bookings }}
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-label">
+                SEATS BOOKED
+            </div>
+
+            <div class="stat-value">
+                {{ total_seats }}
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-label">
+                AVERAGE RATING
+            </div>
+
+            <div class="stat-value">
+                {{ average_rating }}/5
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         ADD EVENT
+         ================================================= -->
+
+    <section class="admin-section">
+
+        <div class="admin-section-header">
+
+            <h2>
+                ➕ Add New Event
+            </h2>
+
+        </div>
+
+
+        <form
+            action="/admin/event/add"
+            method="POST"
+            class="add-event-form">
+
+            <input
+                class="admin-input"
+                type="text"
+                name="name"
+                placeholder="Event name"
+                required>
+
+
+            <input
+                class="admin-input"
+                type="text"
+                name="category"
+                placeholder="Category"
+                required>
+
+
+            <input
+                class="admin-input"
+                type="date"
+                name="date"
+                required>
+
+
+            <input
+                class="admin-input"
+                type="text"
+                name="location"
+                placeholder="Location"
+                required>
+
+
+            <input
+                class="admin-input"
+                type="number"
+                name="capacity"
+                placeholder="Capacity"
+                min="1"
+                required>
+
+
+            <input
+                class="admin-input"
+                type="text"
+                name="description"
+                placeholder="Short event description">
+
+
+            <button
+                type="submit"
+                class="primary-btn full">
+
+                Add Event
+
+            </button>
+
+        </form>
+
+    </section>
+
+
+    <!-- =================================================
+         MANAGE EVENTS
+         ================================================= -->
+
+    <section class="admin-section">
+
+        <div class="admin-section-header">
+
+            <h2>
+                📅 Manage Events
+            </h2>
+
+            <span class="seats">
+                {{ total_events }} events
+            </span>
+
+        </div>
+
+
+        <div class="event-manage-list">
+
+            {% for event in events %}
+
+            <div class="manage-event">
+
+                <div>
+
+                    <h3>
+                        {{ event["name"] }}
+                    </h3>
+
+                    <p>
+
+                        {{ event["category"] }}
+
+                        &nbsp; • &nbsp;
+
+                        📅 {{ event["date"] }}
+
+                        &nbsp; • &nbsp;
+
+                        📍 {{ event["location"] }}
+
+                    </p>
+
+                    <p>
+
+                        🎟️
+                        {{ event["booked_seats"] }}
+                        /
+                        {{ event["capacity"] }}
+                        seats booked
+
+                        &nbsp; • &nbsp;
+
+                        {{ event["capacity"] - event["booked_seats"] }}
+                        available
+
+                    </p>
+
+                </div>
+
+
+                <div class="manage-event-actions">
+
+                    <form
+                        action="/admin/event/delete/{{ event['id'] }}"
+                        method="POST"
+                        onsubmit="return confirmDelete();">
+
+                        <button
+                            type="submit"
+                            class="danger-btn">
+
+                            Delete
+
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+            {% else %}
+
+            <div class="empty-state">
+                No events available.
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+    </section>
+
+
+    <!-- =================================================
+         BOOKINGS & ATTENDANCE
+         ================================================= -->
+
+    <section class="admin-section">
+
+        <div class="admin-section-header">
+
+            <h2>
+                🎟️ Bookings & Attendance
+            </h2>
+
+            <span class="seats">
+                {{ total_bookings }} registrations
+            </span>
+
+        </div>
+
+
+        <div class="table-container">
+
+            <table class="admin-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Participant
+                        </th>
+
+                        <th>
+                            Event
+                        </th>
+
+                        <th>
+                            Email
+                        </th>
+
+                        <th>
+                            Phone
+                        </th>
+
+                        <th>
+                            Seats
+                        </th>
+
+                        <th>
+                            Attendance
+                        </th>
+
+                        <th>
+                            Action
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for booking in bookings %}
+
+                    <tr>
+
+                        <td>
+                            <strong>
+                                {{ booking["name"] }}
+                            </strong>
+                        </td>
+
+                        <td>
+                            {{ booking["event_name"] }}
+                        </td>
+
+                        <td>
+                            {{ booking["email"] }}
+                        </td>
+
+                        <td>
+                            {{ booking["phone"] }}
+                        </td>
+
+                        <td>
+                            {{ booking["seats"] }}
+                        </td>
+
+                        <td>
+
+                            {% if booking["attendance_status"] == "Present" %}
+
+                            <span class="status-present">
+                                ● Present
+                            </span>
+
+                            {% else %}
+
+                            <span class="status-absent">
+                                ● Absent
+                            </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            <div class="attendance-actions">
+
+                                <form
+                                    action="/admin/attendance/{{ booking['id'] }}"
+                                    method="POST">
+
+                                    <input
+                                        type="hidden"
+                                        name="status"
+                                        value="Present">
+
+                                    <button
+                                        type="submit"
+                                        class="success-btn">
+
+                                        Present
+
+                                    </button>
+
+                                </form>
+
+
+                                <form
+                                    action="/admin/attendance/{{ booking['id'] }}"
+                                    method="POST">
+
+                                    <input
+                                        type="hidden"
+                                        name="status"
+                                        value="Absent">
+
+                                    <button
+                                        type="submit"
+                                        class="light-btn">
+
+                                        Absent
+
+                                    </button>
+
+                                </form>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                    {% else %}
+
+                    <tr>
+
+                        <td colspan="7">
+
+                            <div class="empty-state">
+                                No bookings yet.
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+
+    <!-- =================================================
+         FEEDBACK
+         ================================================= -->
+
+    <section class="admin-section">
+
+        <div class="admin-section-header">
+
+            <h2>
+                ⭐ Customer Feedback
+            </h2>
+
+            <span class="seats">
+                {{ total_feedback }} responses
+            </span>
+
+        </div>
+
+
+        <div class="table-container">
+
+            <table class="admin-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Name
+                        </th>
+
+                        <th>
+                            Event
+                        </th>
+
+                        <th>
+                            Rating
+                        </th>
+
+                        <th>
+                            Comments
+                        </th>
+
+                        <th>
+                            Date
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for item in feedback_list %}
+
+                    <tr>
+
+                        <td>
+                            {{ item["name"] }}
+                        </td>
+
+                        <td>
+                            {{ item["event_name"] }}
+                        </td>
+
+                        <td class="rating-text">
+
+                            {{ item["rating"] }}/5 ⭐
+
+                        </td>
+
+                        <td>
+                            {{ item["comments"] or "No comment" }}
+                        </td>
+
+                        <td>
+                            {{ item["feedback_date"] }}
+                        </td>
+
+                    </tr>
+
+                    {% else %}
+
+                    <tr>
+
+                        <td colspan="5">
+
+                            <div class="empty-state">
+                                No feedback submitted yet.
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+
+    <!-- =================================================
+         QUICK REPORT
+         ================================================= -->
+
+    <section class="admin-section">
+
+        <div class="admin-section-header">
+
+            <div>
+
+                <h2>
+                    📊 Reports & Statistics
+                </h2>
+
+                <p
+                    style="
+                        color:#707070;
+                        margin-top:5px;
+                    ">
+
+                    Present your event performance and
+                    attendance data clearly.
+
+                </p>
+
+            </div>
+
+            <a
+                href="/admin/reports"
+                class="primary-btn">
+
+                Open Reports →
+
+            </a>
+
+        </div>
+
+
+        <div
+            style="
+                display:flex;
+                gap:20px;
+                flex-wrap:wrap;
+                color:#666;
+                font-size:14px;
+            ">
+
+            <span>
+                🟢 Present: {{ present_count }}
+            </span>
+
+            <span>
+                🔴 Absent: {{ absent_count }}
+            </span>
+
+            <span>
+                ⭐ Feedback: {{ total_feedback }}
+            </span>
+
+            <span>
+                🎟️ Capacity: {{ total_capacity }}
+            </span>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<footer>
+
+    <div class="logo">
+        Event<span>Hub</span>
+    </div>
+
+    <p>
+        © 2026 EventHub. Admin Management System.
+    </p>
+
+</footer>
+
+
+</body>
+
+</html>

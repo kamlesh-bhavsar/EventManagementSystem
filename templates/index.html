@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>EventHub | Event Management System</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+    <script
+        src="{{ url_for('static', filename='js/script.js') }}"
+        defer>
+    </script>
+
+</head>
+
+<body>
+
+<nav class="navbar">
+
+    <a href="/" class="logo">
+        Event<span>Hub</span>
+    </a>
+
+    <div class="nav-links">
+
+        <a href="/">
+            Home
+        </a>
+
+        <a href="/events">
+            Events
+        </a>
+
+        <a href="#about">
+            About
+        </a>
+
+        <a href="/admin">
+            Admin
+        </a>
+
+    </div>
+
+</nav>
+
+
+<!-- =====================================================
+     HERO
+     ===================================================== -->
+
+<section class="hero">
+
+    <div class="hero-content">
+
+        <span class="hero-tag">
+            SMART EVENT MANAGEMENT
+        </span>
+
+        <h1>
+            Manage Events.
+            <span>Create Experiences.</span>
+        </h1>
+
+        <p>
+            EventHub is a centralized event management platform
+            for discovering events, registering participants,
+            managing bookings, tracking attendance and collecting
+            feedback.
+        </p>
+
+        <div class="hero-actions">
+
+            <a
+                href="/events"
+                class="primary-btn">
+
+                Explore Events →
+
+            </a>
+
+            <a
+                href="#about"
+                class="secondary-btn">
+
+                Learn More
+
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <div class="hero-visual">
+
+        <div class="hero-card">
+
+            <div class="hero-card-top">
+
+                <div>
+
+                    <strong>
+                        Upcoming Event
+                    </strong>
+
+                    <p style="margin:0;">
+                        Tech Innovation Summit
+                    </p>
+
+                </div>
+
+                <div class="hero-card-icon">
+                    🚀
+                </div>
+
+            </div>
+
+            <div class="hero-card-line"></div>
+
+            <p style="margin:12px 0 5px;">
+                📅 September 10, 2026
+            </p>
+
+            <p style="margin:0;">
+                📍 Pune
+            </p>
+
+            <div
+                style="
+                    margin-top:18px;
+                    background:#6255ff;
+                    color:white;
+                    padding:10px;
+                    border-radius:8px;
+                    text-align:center;
+                    font-weight:bold;
+                ">
+
+                Registration Open
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     UPCOMING EVENTS
+     ===================================================== -->
+
+<section class="section">
+
+    <div class="section-heading">
+
+        <p class="small-title">
+            DISCOVER
+        </p>
+
+        <h2>
+            Upcoming Events
+        </h2>
+
+    </div>
+
+
+    <div class="event-grid">
+
+        {% for event in events %}
+
+        <div class="event-card">
+
+            <div class="event-card-image">
+
+                <span class="category">
+                    {{ event["category"] }}
+                </span>
+
+            </div>
+
+            <div class="event-card-body">
+
+                <h3>
+                    {{ event["name"] }}
+                </h3>
+
+                <div class="event-meta">
+
+                    <span>
+                        📅 {{ event["date"] }}
+                    </span>
+
+                    <span>
+                        📍 {{ event["location"] }}
+                    </span>
+
+                </div>
+
+                <div class="event-card-footer">
+
+                    <span class="seats">
+                        {{ event["capacity"] - event["booked_seats"] }}
+                        seats available
+                    </span>
+
+                    <a
+                        href="/event/{{ event['id'] }}"
+                        class="primary-btn">
+
+                        View
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+
+    <div
+        style="
+            text-align:center;
+            margin-top:35px;
+        ">
+
+        <a
+            href="/events"
+            class="secondary-btn">
+
+            View All Events →
+
+        </a>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     ABOUT
+     ===================================================== -->
+
+<section
+    class="section"
+    id="about"
+    style="
+        background:white;
+        text-align:center;
+    ">
+
+    <div class="section-heading">
+
+        <p class="small-title">
+            ABOUT EVENTHUB
+        </p>
+
+        <h2>
+            Everything in One Place
+        </h2>
+
+    </div>
+
+    <p
+        style="
+            max-width:760px;
+            margin:auto;
+            color:#707070;
+            font-size:17px;
+        ">
+
+        EventHub provides a centralized platform where users
+        can discover events, register for them and provide
+        feedback, while administrators can manage events,
+        bookings, attendance and reports efficiently.
+
+    </p>
+
+</section>
+
+
+<footer>
+
+    <div class="logo">
+        Event<span>Hub</span>
+    </div>
+
+    <p>
+        © 2026 EventHub. Event Management System.
+    </p>
+
+</footer>
+
+
+</body>
+
+</html>

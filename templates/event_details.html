@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>
+        {{ event["name"] }} | EventHub
+    </title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+
+<body>
+
+<nav class="navbar">
+
+    <a href="/" class="logo">
+        Event<span>Hub</span>
+    </a>
+
+    <div class="nav-links">
+
+        <a href="/">
+            Home
+        </a>
+
+        <a href="/events">
+            Events
+        </a>
+
+        <a href="/#about">
+            About
+        </a>
+
+        <a href="/admin">
+            Admin
+        </a>
+
+    </div>
+
+</nav>
+
+
+<section class="event-details">
+
+    <div class="details-image">
+
+        <span class="category">
+            {{ event["category"] }}
+        </span>
+
+    </div>
+
+
+    <div class="details-content">
+
+        <p class="small-title">
+            EVENT DETAILS
+        </p>
+
+        <h1>
+            {{ event["name"] }}
+        </h1>
+
+
+        <div class="detail-item">
+
+            📅
+
+            <strong>
+                Date:
+            </strong>
+
+            {{ event["date"] }}
+
+        </div>
+
+
+        <div class="detail-item">
+
+            📍
+
+            <strong>
+                Location:
+            </strong>
+
+            {{ event["location"] }}
+
+        </div>
+
+
+        <div class="detail-item">
+
+            👥
+
+            <strong>
+                Capacity:
+            </strong>
+
+            {{ event["capacity"] }} people
+
+        </div>
+
+
+        <div class="detail-item">
+
+            🎟️
+
+            <strong>
+                Seats Booked:
+            </strong>
+
+            {{ event["booked_seats"] }}
+
+        </div>
+
+
+        <div class="detail-item">
+
+            ⭐
+
+            <strong>
+                Average Rating:
+            </strong>
+
+            {{ average_rating }}/5
+
+        </div>
+
+
+        <h3>
+            About this event
+        </h3>
+
+        <p class="details-description">
+            {{ event["description"] }}
+        </p>
+
+
+        {% if available_seats > 0 %}
+
+        <div class="availability-box">
+
+            ✓ {{ available_seats }} seats available
+
+        </div>
+
+        <br>
+
+        <a
+            href="/register/{{ event['id'] }}"
+            class="primary-btn">
+
+            Register Now →
+
+        </a>
+
+        {% else %}
+
+        <div
+            class="availability-box"
+            style="
+                background:#ffe9ea;
+                color:#c0392b;
+            ">
+
+            This event is currently full.
+
+        </div>
+
+        {% endif %}
+
+
+        <br><br>
+
+        <a
+            href="/feedback/{{ event['id'] }}"
+            class="secondary-btn">
+
+            ⭐ Give Feedback
+
+        </a>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     FEEDBACK
+     ===================================================== -->
+
+<section class="feedback-preview">
+
+    <h2>
+        ⭐ Recent Feedback
+    </h2>
+
+    {% if feedback %}
+
+        {% for item in feedback %}
+
+        <div class="feedback-item">
+
+            <div>
+
+                <span class="feedback-name">
+                    {{ item["name"] }}
+                </span>
+
+                <span class="stars">
+
+                    {% for i in range(item["rating"]) %}
+                        ★
+                    {% endfor %}
+
+                </span>
+
+            </div>
+
+            <p>
+                {{ item["comments"] or "No comment provided." }}
+            </p>
+
+        </div>
+
+        {% endfor %}
+
+    {% else %}
+
+        <p style="color:#777;">
+            No feedback has been submitted yet.
+        </p>
+
+    {% endif %}
+
+</section>
+
+
+<footer>
+
+    <div class="logo">
+        Event<span>Hub</span>
+    </div>
+
+    <p>
+        © 2026 EventHub. Event Management System.
+    </p>
+
+</footer>
+
+
+</body>
+
+</html>
