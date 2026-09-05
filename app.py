@@ -1,7 +1,12 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 import sqlite3
+import os
+import json
+import urllib.request
+
 
 app = Flask(__name__)
+
 
 # =========================================================
 # APPLICATION SETTINGS
@@ -17,13 +22,28 @@ ADMIN_PASSWORD = "admin123"
 
 
 # =========================================================
+# EMAIL SERVICE SETTINGS
+# =========================================================
+
+# These values will be added later in Render Environment
+# Variables. Do NOT put the secret token directly in GitHub.
+
+EMAIL_SERVICE_URL = os.environ.get("EMAIL_SERVICE_URL", "")
+EMAIL_SERVICE_TOKEN = os.environ.get("EMAIL_SERVICE_TOKEN", "")
+
+
+# =========================================================
 # DATABASE CONNECTION
 # =========================================================
 
 def get_db():
+
     conn = sqlite3.connect(DATABASE)
+
     conn.row_factory = sqlite3.Row
+
     conn.execute("PRAGMA foreign_keys = ON")
+
     return conn
 
 
@@ -189,11 +209,100 @@ def init_db():
         ))
 
     conn.commit()
+
     conn.close()
+
+
 # =========================================================
 # INITIALIZE DATABASE
 # =========================================================
+
 init_db()
+
+
+# =========================================================
+# EMAIL SERVICE
+# =========================================================
+
+def send_booking_email(
+    name,
+    email,
+    event_name,
+    event_date,
+    venue,
+    seats,
+    booking_id
+):
+
+    # If Render variables are not configured,
+    # simply skip email without breaking booking.
+
+    if not EMAIL_SERVICE_URL or not EMAIL_SERVICE_TOKEN:
+
+        print("Email service is not configured.")
+
+        return False
+
+    payload = {
+
+        "token": EMAIL_SERVICE_TOKEN,
+
+        "name": name,
+
+        "email": email,
+
+        "event_name": event_name,
+
+        "event_date": event_date,
+
+        "venue": venue,
+
+        "seats": seats,
+
+        "booking_id": booking_id
+    }
+
+    try:
+
+        data = json.dumps(payload).encode("utf-8")
+
+        request_object = urllib.request.Request(
+
+            EMAIL_SERVICE_URL,
+
+            data=data,
+
+            headers={
+                "Content-Type": "application/json"
+            },
+
+            method="POST"
+        )
+
+        with urllib.request.urlopen(
+            request_object,
+            timeout=15
+        ) as response:
+
+            result = response.read().decode("utf-8")
+
+            print(
+                "Email service response:",
+                result
+            )
+
+            return True
+
+    except Exception as error:
+
+        # Email failure should NOT cancel a successful booking.
+
+        print(
+            "Email sending failed:",
+            error
+        )
+
+        return False
 
 
 # =========================================================
@@ -202,27 +311,40 @@ init_db()
 
 def admin_required():
 
-    return session.get("admin_logged_in") is True
+    return session.get(
+        "admin_logged_in"
+    ) is True
 
 
-def get_available_seats(conn, event_id):
+def get_available_seats(
+    conn,
+    event_id
+):
 
     event = conn.execute("""
         SELECT capacity
         FROM events
         WHERE id = ?
-    """, (event_id,)).fetchone()
+    """, (
+        event_id,
+    )).fetchone()
 
     if event is None:
+
         return 0
 
     booked = conn.execute("""
         SELECT COALESCE(SUM(seats), 0)
         FROM bookings
         WHERE event_id = ?
-    """, (event_id,)).fetchone()[0]
+    """, (
+        event_id,
+    )).fetchone()[0]
 
-    return max(event["capacity"] - booked, 0)
+    return max(
+        event["capacity"] - booked,
+        0
+    )
 
 
 # =========================================================
@@ -237,6 +359,7 @@ def home():
     events = conn.execute("""
         SELECT
             events.*,
+
             COALESCE(
                 (
                     SELECT SUM(bookings.seats)
@@ -245,8 +368,11 @@ def home():
                 ),
                 0
             ) AS booked_seats
+
         FROM events
+
         ORDER BY date
+
         LIMIT 6
     """).fetchall()
 
@@ -270,6 +396,7 @@ def events():
     events = conn.execute("""
         SELECT
             events.*,
+
             COALESCE(
                 (
                     SELECT SUM(bookings.seats)
@@ -278,7 +405,9 @@ def events():
                 ),
                 0
             ) AS booked_seats
+
         FROM events
+
         ORDER BY date
     """).fetchall()
 
@@ -302,6 +431,7 @@ def event_details(event_id):
     event = conn.execute("""
         SELECT
             events.*,
+
             COALESCE(
                 (
                     SELECT SUM(bookings.seats)
@@ -310,9 +440,13 @@ def event_details(event_id):
                 ),
                 0
             ) AS booked_seats
+
         FROM events
+
         WHERE events.id = ?
-    """, (event_id,)).fetchone()
+    """, (
+        event_id,
+    )).fetchone()
 
     if event is None:
 
@@ -331,26 +465,43 @@ def event_details(event_id):
             rating,
             comments,
             feedback_date
+
         FROM feedback
+
         WHERE event_id = ?
+
         ORDER BY feedback_date DESC
+
         LIMIT 5
-    """, (event_id,)).fetchall()
+    """, (
+        event_id,
+    )).fetchall()
 
     average_rating = conn.execute("""
         SELECT COALESCE(AVG(rating), 0)
+
         FROM feedback
+
         WHERE event_id = ?
-    """, (event_id,)).fetchone()[0]
+    """, (
+        event_id,
+    )).fetchone()[0]
 
     conn.close()
 
     return render_template(
         "event_details.html",
+
         event=event,
+
         available_seats=available_seats,
+
         feedback=feedback,
-        average_rating=round(average_rating, 1)
+
+        average_rating=round(
+            average_rating,
+            1
+        )
     )
 
 
@@ -370,7 +521,9 @@ def register(event_id):
         SELECT *
         FROM events
         WHERE id = ?
-    """, (event_id,)).fetchone()
+    """, (
+        event_id,
+    )).fetchone()
 
     if event is None:
 
@@ -413,7 +566,10 @@ def register(event_id):
 
             conn.close()
 
-            return "Invalid number of seats.", 400
+            return (
+                "Invalid number of seats.",
+                400
+            )
 
         # -------------------------------------------------
         # VALIDATION
@@ -423,25 +579,37 @@ def register(event_id):
 
             conn.close()
 
-            return "Please enter your name.", 400
+            return (
+                "Please enter your name.",
+                400
+            )
 
         if not email:
 
             conn.close()
 
-            return "Please enter your email.", 400
+            return (
+                "Please enter your email.",
+                400
+            )
 
         if not phone:
 
             conn.close()
 
-            return "Please enter your phone number.", 400
+            return (
+                "Please enter your phone number.",
+                400
+            )
 
         if seats < 1:
 
             conn.close()
 
-            return "Number of seats must be at least 1.", 400
+            return (
+                "Number of seats must be at least 1.",
+                400
+            )
 
         if seats > available_seats:
 
@@ -493,14 +661,48 @@ def register(event_id):
             "Absent"
         ))
 
+        # -------------------------------------------------
+        # SAVE BOOKING
+        # -------------------------------------------------
+
         conn.commit()
+
         conn.close()
+
+        # -------------------------------------------------
+        # SEND CONFIRMATION EMAIL
+        # -------------------------------------------------
+
+        send_booking_email(
+
+            name=name,
+
+            email=email,
+
+            event_name=event["name"],
+
+            event_date=event["date"],
+
+            venue=event["location"],
+
+            seats=seats,
+
+            booking_id=booking_id
+        )
+
+        # -------------------------------------------------
+        # SHOW SUCCESS PAGE
+        # -------------------------------------------------
 
         return render_template(
             "booking_success.html",
+
             event=event,
+
             name=name,
+
             email=email,
+
             seats=seats
         )
 
@@ -508,7 +710,9 @@ def register(event_id):
 
     return render_template(
         "register.html",
+
         event=event,
+
         available_seats=available_seats
     )
 
@@ -529,7 +733,9 @@ def feedback(event_id):
         SELECT *
         FROM events
         WHERE id = ?
-    """, (event_id,)).fetchone()
+    """, (
+        event_id,
+    )).fetchone()
 
     if event is None:
 
@@ -604,11 +810,14 @@ def feedback(event_id):
         ))
 
         conn.commit()
+
         conn.close()
 
         return render_template(
             "feedback.html",
+
             event=event,
+
             submitted=True
         )
 
@@ -616,7 +825,9 @@ def feedback(event_id):
 
     return render_template(
         "feedback.html",
+
         event=event,
+
         submitted=False
     )
 
@@ -645,10 +856,13 @@ def login():
 
         if (
             username == ADMIN_USERNAME
-            and password == ADMIN_PASSWORD
+            and
+            password == ADMIN_PASSWORD
         ):
 
-            session["admin_logged_in"] = True
+            session[
+                "admin_logged_in"
+            ] = True
 
             return redirect(
                 url_for("admin")
@@ -656,11 +870,13 @@ def login():
 
         return render_template(
             "login.html",
+
             error="Invalid username or password."
         )
 
     return render_template(
         "login.html",
+
         error=None
     )
 
@@ -770,10 +986,15 @@ def admin():
         SELECT
 
             bookings.id,
+
             bookings.name,
+
             bookings.email,
+
             bookings.phone,
+
             bookings.seats,
+
             bookings.booking_date,
 
             events.name AS event_name,
@@ -802,9 +1023,13 @@ def admin():
         SELECT
 
             feedback.name,
+
             feedback.email,
+
             feedback.rating,
+
             feedback.comments,
+
             feedback.feedback_date,
 
             events.name AS event_name
@@ -939,6 +1164,7 @@ def add_event():
     ))
 
     conn.commit()
+
     conn.close()
 
     return redirect(
@@ -965,34 +1191,54 @@ def delete_event(event_id):
     conn = get_db()
 
     # Delete attendance for bookings
+
     conn.execute("""
         DELETE FROM attendance
+
         WHERE booking_id IN (
+
             SELECT id
+
             FROM bookings
+
             WHERE event_id = ?
         )
-    """, (event_id,))
+    """, (
+        event_id,
+    ))
 
     # Delete bookings
+
     conn.execute("""
         DELETE FROM bookings
+
         WHERE event_id = ?
-    """, (event_id,))
+    """, (
+        event_id,
+    ))
 
     # Delete feedback
+
     conn.execute("""
         DELETE FROM feedback
+
         WHERE event_id = ?
-    """, (event_id,))
+    """, (
+        event_id,
+    ))
 
     # Delete event
+
     conn.execute("""
         DELETE FROM events
+
         WHERE id = ?
-    """, (event_id,))
+    """, (
+        event_id,
+    ))
 
     conn.commit()
+
     conn.close()
 
     return redirect(
@@ -1034,7 +1280,9 @@ def mark_attendance(booking_id):
         SELECT id
         FROM attendance
         WHERE booking_id = ?
-    """, (booking_id,)).fetchone()
+    """, (
+        booking_id,
+    )).fetchone()
 
     if existing:
 
@@ -1064,6 +1312,7 @@ def mark_attendance(booking_id):
         ))
 
     conn.commit()
+
     conn.close()
 
     return redirect(
@@ -1094,15 +1343,21 @@ def reports():
         SELECT
 
             events.id,
+
             events.name,
+
             events.category,
+
             events.date,
+
             events.capacity,
 
             COALESCE(
                 (
                     SELECT SUM(bookings.seats)
+
                     FROM bookings
+
                     WHERE bookings.event_id = events.id
                 ),
                 0
@@ -1110,20 +1365,26 @@ def reports():
 
             (
                 SELECT COUNT(*)
+
                 FROM bookings
+
                 WHERE bookings.event_id = events.id
             ) AS registrations,
 
             (
                 SELECT COUNT(*)
+
                 FROM feedback
+
                 WHERE feedback.event_id = events.id
             ) AS feedback_count,
 
             COALESCE(
                 (
                     SELECT AVG(feedback.rating)
+
                     FROM feedback
+
                     WHERE feedback.event_id = events.id
                 ),
                 0
@@ -1182,6 +1443,10 @@ def reports():
 
     conn.close()
 
+    # -----------------------------------------------------
+    # OCCUPANCY
+    # -----------------------------------------------------
+
     occupancy = 0
 
     if total_capacity > 0:
@@ -1190,6 +1455,10 @@ def reports():
             (total_seats / total_capacity) * 100,
             1
         )
+
+    # -----------------------------------------------------
+    # ATTENDANCE RATE
+    # -----------------------------------------------------
 
     attendance_total = present + absent
 
